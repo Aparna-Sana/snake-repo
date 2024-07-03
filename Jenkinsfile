@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        registry = "amrit96/snake"
-        registryCredential = 'training_creds'
+        registry = "sana1210/snake"
+        registryCredential = 'my_dockerhub'
     }
 
     stages {
