@@ -1,30 +1,48 @@
-pipeline{  
+pipeline {
     agent any
-    
-    def app
-    stage('Cloning Git') {
-        /* Let's make sure we have the repository cloned to our workspace */
-       checkout scm
-    }  
-    
-    stage('Build-and-Tag') {
-    /* This builds the actual image; synonymous to
-         * docker build on the command line */
-        app = docker.build("amrit96/snake")
+
+    environment {
+        registry = "amrit96/snake"
+        registryCredential = 'training_creds'
     }
-    stage('Post-to-dockerhub') {
-    
-     docker.withRegistry('https://registry.hub.docker.com', 'my_dockerhub') {
-            app.push("latest")
-        			}
-         }
-  
-    
-    stage('Pull-image-server') {
-    
-         sh "docker-compose down"
-         sh "docker-compose up -d"	
-      }
- 
+
+    stages {
+        stage('Cloning Git') {
+            steps {
+                // Clone the repository
+                checkout scm
+            }
+        }
+        
+        stage('Build-and-Tag') {
+            steps {
+                script {
+                    // Build the Docker image
+                    app = docker.build("${registry}")
+                }
+            }
+        }
+        
+        stage('Post-to-dockerhub') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', "${registryCredential}") {
+                        // Push the Docker image to Docker Hub
+                        app.push("latest")
+                    }
+                }
+            }
+        }
+        
+        stage('Pull-image-server') {
+            steps {
+                script {
+                    // Pull the Docker image and restart the containers using Docker Compose
+                    sh "docker-compose down"
+                    sh "docker-compose up -d"
+                }
+            }
+        }
+    }
 }
 
