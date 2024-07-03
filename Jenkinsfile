@@ -1,4 +1,6 @@
-node ('agent any'){  
+pipeline{  
+    agent any
+    
     def app
     stage('Cloning Git') {
         /* Let's make sure we have the repository cloned to our workspace */
@@ -12,7 +14,7 @@ node ('agent any'){
     }
     stage('Post-to-dockerhub') {
     
-     docker.withRegistry('https://registry.hub.docker.com', 'training_creds') {
+     docker.withRegistry('https://registry.hub.docker.com', 'my_dockerhub') {
             app.push("latest")
         			}
          }
